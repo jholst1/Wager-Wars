@@ -706,7 +706,7 @@ function EndPhase({room,myName}) {
   const myDrink=drinkTotals[myName]||0;
 
   return h("div",{className:"col"},
-      onDone:chosen=>doHandOut(chosen)}),
+      onDone:chosen=>doHandOut(chosen)},
 
     h("div",{className:"text-center"},
       h("div",{className:"text-5xl mb2"},"🏁"),
