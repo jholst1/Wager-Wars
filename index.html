@@ -706,7 +706,6 @@ function EndPhase({room,myName}) {
   const myDrink=drinkTotals[myName]||0;
 
   return h("div",{className:"col"},
-    handOutPopup&&h(HandOutPopup,{sips:myGive,players:room.players.filter(p=>p.name!==myName),
       onDone:chosen=>doHandOut(chosen)}),
 
     h("div",{className:"text-center"},
