@@ -571,7 +571,7 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
 
       if(w<0){
         // short was RIGHT -> hand out |w| * odds
-        const g=Math.round(Math.abs(w)*odds);
+        const g=Math.abs(w);
         giveTotals[p.name]=(giveTotals[p.name]||0)+g;
         outcomes[p.name]={give:g,drink:0};
       } else {
