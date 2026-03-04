@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>The Bet Game 🍺(test)</title>
+<title>The Bet Game 🍺</title>
 <!-- React + ReactDOM (UMD builds, work everywhere) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -242,6 +242,7 @@ function HostSetup({onStart}) {
         h(Btn,{onClick:()=>setMinutes(m=>m+5),color:"gray",sm:true},"+")
       )
 
+    ),
     h(Card,{},
       h("span",{className:"label"},"Max total wager per player (sum of abs wagers)"),
       h("div",{className:"flex items-center gap3"},
@@ -250,7 +251,6 @@ function HostSetup({onStart}) {
         !noLimit && h("span",{className:"muted text-sm"},"sips")
       ),
       h("p",{className:"muted text-xs mt2"},"Counts both longs and shorts using absolute value. Per-bet max is still 14.")
-    ),
     ),
     h(Btn,{onClick:start,color:"green",full:true},"Create Room")
   );
@@ -647,6 +647,8 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
       myName,
       onClose:()=>setVerifyPopup(null)
     }),
+    h("div",{className:"row-between"},
+      h("span",{className:tClass},fmt(timeLeft)),
       h("span",{className:`badge ${myGroup==="A"?"badge-a":"badge-b"}`},myGroup==="A"?"🔵 Group A":"🔴 Group B")
     ),
     res&&h("div",{className:res.correct?"result-card-green":"result-card-red"},
