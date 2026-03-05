@@ -324,7 +324,7 @@ function BettingPhase({room,myName,isHost,onRoomUpdate}) {
     await saveRoom(room.code,u); onRoomUpdate(u);
   };
   const lockBets=async()=>{
-    if(groupBets.length===0){alert("Add at least 1 bet first.");return;}
+    if(myBets.length===0){alert("Add at least 1 bet first.");return;}
     const u={...room,bets:room.bets.map(b=>b.author===myName?{...b,locked:true}:b)};
     await saveRoom(room.code,u); onRoomUpdate(u);
   };
@@ -347,10 +347,10 @@ function BettingPhase({room,myName,isHost,onRoomUpdate}) {
       h("div",{className:"mt3"},h(Inp,{value:betText,onChange:setBetText,placeholder:`e.g. ${target} will spill their drink`})),
       h("div",{className:"flex gap2 mt3"},
         h(Btn,{onClick:addBet,color:"indigo",sm:true,disabled:myBets.length>=5||!betText.trim()},"Add Bet"),
-        groupBets.length>0&&h(Btn,{onClick:lockBets,color:"green",sm:true},"Lock In")
+        myBets.length>0&&h(Btn,{onClick:lockBets,color:"green",sm:true},"Lock In")
       )
     ),
-    groupBets.length>0&&h(Card,{},
+    myBets.length>0&&h(Card,{},
       locked&&h("p",{className:"font-bold mb3 c-green"},"✓ Bets locked in!"),
       h("div",{className:"flex flex-col gap2"},
         ...myBets.map(b=>h("div",{key:b.id,className:"bet-row"},
@@ -436,7 +436,7 @@ function WageringPhase({room,myName,isHost,onRoomUpdate}) {
   const groupBets=(room.bets||[]).filter(b=>b.group===myGroup&&b.locked);
   const existing=(room.wagers||{})[myName]||{};
   const [wagers,setWagers]=useState(()=>{const w={};groupBets.forEach(b=>{w[b.id]=existing[b.id]??0;});return w;});
-  const saved=Object.keys(((room.wagers||{})[myName]||{})).length>=groupBets.length && groupBets.length>0;
+  const saved=Object.keys((room.wagers||{})[myName]||{}).length>=groupBets.length&&groupBets.length>0;
   const MAX_WAGER_TOTAL = (room.maxWagerTotal===undefined ? 14 : room.maxWagerTotal); // null => no limit
   const setW=(id,val)=>setWagers(w=>{
     const old=Number(w[id]||0);
@@ -461,8 +461,8 @@ function WageringPhase({room,myName,isHost,onRoomUpdate}) {
     await saveRoom(room.code,u); onRoomUpdate(u);
   };
   const allWagered=room.players.every(p=>{
-    const pb=(room.bets||[]).filter(b=>b.group===p.group&&b.locked);
-    return pb.length===0 || Object.keys(((room.wagers||{})[p.name]||{})).length>=pb.length;
+    const pb=(room.bets||[]).filter(b=>b.author===p.name&&b.locked);
+    return pb.length===0||Object.keys((room.wagers||{})[p.name]||{}).length>=pb.length;
   });
   const startGame=async()=>{
     const timerEnd=Date.now()+room.timerMinutes*60*1000;
