@@ -1,7 +1,6 @@
 /* Constants + helpers */
 window.BG = window.BG || {};
 BG.consts = BG.consts || {};
-
 // ── Constants ─────────────────────────────────────────────────
 const SIPS = 14;
 const LIKELIHOOD_OPTIONS = ["Very Unlikely", "Unlikely", "Neutral", "Likely", "Very Likely"];
@@ -21,10 +20,11 @@ function computeOdds(betId, bets, votes, players) {
   return Math.round((total/voters.length)*100)/100;
 }
 
-// Export commonly used helpers
-BG.consts.SIPS = SIPS;
-BG.consts.LIKELIHOOD_OPTIONS = LIKELIHOOD_OPTIONS;
-BG.consts.ODDS_MAP = ODDS_MAP;
-BG.consts.genCode = genCode;
-BG.consts.sipsToDrinks = sipsToDrinks;
-BG.consts.computeOdds = computeOdds;
+
+
+BG.consts.SIPS=SIPS;
+BG.consts.LIKELIHOOD_OPTIONS=LIKELIHOOD_OPTIONS;
+BG.consts.ODDS_MAP=ODDS_MAP;
+BG.consts.genCode=genCode;
+BG.consts.sipsToDrinks=sipsToDrinks;
+BG.consts.computeOdds=computeOdds;

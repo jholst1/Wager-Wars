@@ -1,7 +1,6 @@
 /* Firebase */
 window.BG = window.BG || {};
 BG.fb = BG.fb || {};
-
 firebase.initializeApp({
   apiKey: "AIzaSyC4nebdvhGrJgUpnUuC3ZeTBKyFRhVju_8",
   authDomain: "the-bet-game.firebaseapp.com",
@@ -23,7 +22,7 @@ async function loadRoom(code) {
   return s.exists() ? s.val() : null;
 }
 
-BG.fb.db = db;
 BG.fb.saveRoom = saveRoom;
 BG.fb.subscribeRoom = subscribeRoom;
 BG.fb.loadRoom = loadRoom;
+BG.fb.db = db;
