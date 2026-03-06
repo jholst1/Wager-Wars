@@ -1,3 +1,4 @@
+(function(){
 /* Popups */
 window.BG = window.BG || {};
 BG.popups = BG.popups || {};
@@ -85,3 +86,5 @@ function RulesPopup({onClose}) {
 BG.popups.VerifyPopup=VerifyPopup;
 BG.popups.GuessPopup=GuessPopup;
 BG.popups.RulesPopup=RulesPopup;
+
+})();

@@ -1,3 +1,4 @@
+(function(){
 window.BG = window.BG || {};
 BG.phases = BG.phases || {};
 const { h, useState, useEffect, useRef, useCallback } = BG.core;
@@ -50,3 +51,5 @@ function HostSetup({onStart}) {
 }
 
 BG.phases.HostSetup = HostSetup;
+
+})();

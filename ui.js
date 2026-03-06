@@ -1,3 +1,4 @@
+(function(){
 /* UI primitives */
 window.BG = window.BG || {};
 BG.ui = BG.ui || {};
@@ -27,3 +28,5 @@ BG.ui.Btn=Btn;
 BG.ui.Card=Card;
 BG.ui.Inp=Inp;
 BG.ui.Sel=Sel;
+
+})();

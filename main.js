@@ -1,3 +1,4 @@
+(function(){
 /* Main app entry */
 window.BG = window.BG || {};
 const { h, useState, useEffect, useRef, useCallback } = BG.core;
@@ -57,3 +58,5 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(h(App,null));
+
+})();

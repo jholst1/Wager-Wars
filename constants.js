@@ -1,3 +1,4 @@
+(function(){
 /* Constants + helpers */
 window.BG = window.BG || {};
 BG.consts = BG.consts || {};
@@ -28,3 +29,5 @@ BG.consts.ODDS_MAP=ODDS_MAP;
 BG.consts.genCode=genCode;
 BG.consts.sipsToDrinks=sipsToDrinks;
 BG.consts.computeOdds=computeOdds;
+
+})();

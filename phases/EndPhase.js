@@ -1,3 +1,4 @@
+(function(){
 window.BG = window.BG || {};
 BG.phases = BG.phases || {};
 const { h, useState, useEffect, useRef, useCallback } = BG.core;
@@ -229,3 +230,5 @@ function EndPhase({room,myName}) {
 }
 
 BG.phases.EndPhase = EndPhase;
+
+})();

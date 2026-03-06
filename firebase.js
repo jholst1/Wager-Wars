@@ -1,3 +1,4 @@
+(function(){
 /* Firebase */
 window.BG = window.BG || {};
 BG.fb = BG.fb || {};
@@ -26,3 +27,5 @@ BG.fb.saveRoom = saveRoom;
 BG.fb.subscribeRoom = subscribeRoom;
 BG.fb.loadRoom = loadRoom;
 BG.fb.db = db;
+
+})();
