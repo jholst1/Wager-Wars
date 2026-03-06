@@ -3,6 +3,7 @@
 window.BG = window.BG || {};
 const { h, useState, useEffect, useRef, useCallback } = BG.core;
 const { Btn, Card, Inp, Sel } = BG.ui;   // <-- this line fixes it
+const { genCode } = BG.consts;
 const { Landing, HostSetup, Lobby, BettingPhase, VotingPhase, WageringPhase, LivePhase, EndPhase } = BG.phases;
 const { subscribeRoom, loadRoom, saveRoom } = BG.fb;
 
