@@ -191,21 +191,6 @@ const verifyBet=async bet=>{
       await saveRoom(room.code,u); onRoomUpdate(u);
     } else {
       const highest=Math.max(1,...otherBets.map(b=>Math.abs((room.wagers||{})[b.author]?.[b.id]||1)));
-      // NEW: summary for banner
-      const missedHits = missedHitEvents.length;
-      
-      const handoutFromMissedHits = missedHitEvents.reduce((sum, e) => {
-        const betId = e.betId;
-      
-        // your wager on that bet
-        const w = Number(((room.wagers || {})[myName] || {})[betId] || 0);
-      
-        // only longs give handouts when a bet hits
-        if (w <= 0) return sum;
-      
-        const odds = (room.oddsMap || {})[betId] || 1;
-        return sum + Math.round(w * odds);
-      }, 0);
       const u={
         ...room,
         lastGuessResult:{
@@ -224,6 +209,17 @@ const verifyBet=async bet=>{
   const tClass=timeLeft<60000?"timer timer-red":timeLeft<180000?"timer timer-yellow":"timer timer-green";
   const otherActive=(room.bets||[]).filter(b=>b.group!==myGroup&&activeBetIds.includes(b.id));
   const highest=Math.max(1,...otherActive.map(b=>Math.abs((room.wagers||{})[b.author]?.[b.id]||1)));
+
+  // NEW: summary for banner
+  const missedHits = missedHitEvents.length;
+
+  const handoutFromMissedHits = missedHitEvents.reduce((sum, e) => {
+    const betId = e.betId;
+    const w = Number(((room.wagers || {})[myName] || {})[betId] || 0);
+    if (w <= 0) return sum; // only longs give handouts when bet hits
+    const odds = (room.oddsMap || {})[betId] || 1;
+    return sum + Math.round(w * odds);
+  }, 0);
 
   return h("div",{className:"col",style:{paddingTop:"1rem"}},
     verifyPopup&&h(VerifyPopup,{
