@@ -15,7 +15,31 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
   const [verifyPopup,setVerifyPopup]=useState(null);
   const [guessPopup,setGuessPopup]=useState(null);
   const endedRef=useRef(false), lastVerifiedRef=useRef(null);
-
+  
+  // NEW: missed bet-hit banner (per device)
+  const roomKey = `betgame:lastSeenSeq:${room.code}`;
+  const [missedHitEvents, setMissedHitEvents] = useState([]);
+  const [showMissed, setShowMissed] = useState(false);
+  
+  useEffect(() => {
+    const currentSeq = room.eventSeq || 0;
+    const lastSeen = Number(localStorage.getItem(roomKey) || 0);
+    const log = room.eventLog || [];
+  
+    if (currentSeq > lastSeen) {
+      const missed = log.filter(e => (e.seq || 0) > lastSeen && e.type === "verify" && e.betId);
+      setMissedHitEvents(missed);
+    } else {
+      setMissedHitEvents([]);
+    }
+  }, [room.eventSeq, room.eventLog]);
+  
+  const dismissMissed = () => {
+    const currentSeq = room.eventSeq || 0;
+    localStorage.setItem(roomKey, String(currentSeq));
+    setMissedHitEvents([]);
+    setShowMissed(false);
+  };
   useEffect(()=>{const iv=setInterval(()=>setTimeLeft(Math.max(0,(room.timerEnd||0)-Date.now())),1000);return()=>clearInterval(iv);},[room.timerEnd]);
 
   useEffect(()=>{
@@ -105,21 +129,34 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
 
   useEffect(()=>{if(timeLeft===0&&room.phase==="live"&&isHost) endGame();},[timeLeft]);
 
-  const verifyBet=async bet=>{
-    const res=resolveBetVerified(bet,room);
-    const u={...room,
-      activeBets:activeBetIds.filter(id=>id!==bet.id),
-      verifiedBets:[...(room.verifiedBets||[]),bet.id],
-      drinkTotals:res.drinkTotals,
-      giveTotals:res.giveTotals,
-      lastVerifiedBet:{
-        id:bet.id,target:bet.target,text:bet.text,author:bet.author,
-        outcomes:res.outcomes,
-        ts:Date.now()
-      }
-    };
-    await saveRoom(room.code,u); onRoomUpdate(u);
+const verifyBet=async bet=>{
+  const res=resolveBetVerified(bet,room);
+
+  // NEW: event counter/log so phones can show "missed bet hits"
+  const nextSeq = (room.eventSeq || 0) + 1;
+  const nextLog = [
+    ...((room.eventLog || []).slice(-30)),
+    { seq: nextSeq, ts: Date.now(), type: "verify", betId: bet.id, by: myName }
+  ];
+
+  const u={...room,
+    activeBets:activeBetIds.filter(id=>id!==bet.id),
+    verifiedBets:[...(room.verifiedBets||[]),bet.id],
+    drinkTotals:res.drinkTotals,
+    giveTotals:res.giveTotals,
+    lastVerifiedBet:{
+      id:bet.id,target:bet.target,text:bet.text,author:bet.author,
+      outcomes:res.outcomes,
+      ts:Date.now()
+    },
+
+    // NEW:
+    eventSeq: nextSeq,
+    eventLog: nextLog
   };
+
+  await saveRoom(room.code,u); onRoomUpdate(u);
+};
   const submitGuess=async()=>{
     if(!guessText.trim()) return;
     const otherBets=(room.bets||[]).filter(b=>b.group!==myGroup && activeBetIds.includes(b.id));
@@ -154,6 +191,21 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
       await saveRoom(room.code,u); onRoomUpdate(u);
     } else {
       const highest=Math.max(1,...otherBets.map(b=>Math.abs((room.wagers||{})[b.author]?.[b.id]||1)));
+      // NEW: summary for banner
+      const missedHits = missedHitEvents.length;
+      
+      const handoutFromMissedHits = missedHitEvents.reduce((sum, e) => {
+        const betId = e.betId;
+      
+        // your wager on that bet
+        const w = Number(((room.wagers || {})[myName] || {})[betId] || 0);
+      
+        // only longs give handouts when a bet hits
+        if (w <= 0) return sum;
+      
+        const odds = (room.oddsMap || {})[betId] || 1;
+        return sum + Math.round(w * odds);
+      }, 0);
       const u={
         ...room,
         lastGuessResult:{
@@ -181,10 +233,57 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
       onClose:()=>setVerifyPopup(null)
     }),
     guessPopup&&h(GuessPopup,{result:guessPopup,myName,onClose:()=>setGuessPopup(null)}),
+  showMissed && h("div",{className:"overlay"},
+  h(Card,{className:"overlay-card card-yellow"},
+    h("div",{className:"text-5xl mb3"},"🔔"),
+    h("p",{className:"font-black text-xl mb2 c-yellow"},"Missed bet hits"),
+    h("div",{style:{maxHeight:"50vh", overflowY:"auto", textAlign:"left"}},
+      ...(missedHitEvents.slice().reverse().map(ev => {
+        const bet = (room.bets || []).find(b => b.id === ev.betId);
+        if (!bet) return h("p",{className:"muted text-sm"},`Bet ${ev.betId} hit`);
+
+        const w = Number(((room.wagers || {})[myName] || {})[ev.betId] || 0);
+        const odds = (room.oddsMap || {})[ev.betId] || 1;
+
+        let action = "No wager";
+        if (w > 0) action = `Hand out ${Math.round(w * odds)} sips`;
+        else if (w < 0) action = `Drink ${Math.abs(w)} sips`;
+
+        return h("div",{key:ev.seq, className:"bet-row"},
+          h("div",{style:{flex:1}},
+            h("div",{className:"row-between"},
+              h("span",{className:"c-indigo font-semibold"}, bet.target),
+              h("span",{className:"muted text-xs"}, action)
+            ),
+            h("div",{className:"text-sm"}, bet.text)
+          )
+        );
+      }))
+    ),
+    h("div",{className:"mt3"}),
+    h(Btn,{onClick:dismissMissed,color:"yellow",full:true},"Got it")
+  )
+),
     h("div",{className:"row-between"},
       h("span",{className:tClass},fmt(timeLeft)),
       h("span",{className:`badge ${myGroup==="A"?"badge-a":"badge-b"}`},myGroup==="A"?"🔵 Group A":"🔴 Group B")
     ),
+           missedHits > 0 && h(Card,{className:"card-yellow"},
+  h("div",{className:"row-between"},
+    h("div",{},
+      h("p",{className:"font-black c-yellow",style:{margin:"0 0 0.25rem 0"}},
+        `${missedHits} bet${missedHits!==1?"s":""} hit · You can hand out ${handoutFromMissedHits} sip${handoutFromMissedHits!==1?"s":""}`
+      ),
+      h("p",{className:"muted text-xs",style:{margin:0}},
+        "Tap “See” to view which bets hit while you were away."
+      )
+    ),
+    h("div",{className:"row",style:{gap:"0.5rem"}},
+      h(Btn,{onClick:()=>setShowMissed(true),color:"gray",sm:true},"See"),
+      h(Btn,{onClick:dismissMissed,color:"yellow",sm:true},"Dismiss")
+    )
+  )
+),
     h("h3",{className:"font-bold",style:{color:"rgba(255,255,255,0.85)",margin:0}},"Your Group's Active Bets"),
     myGroupBets.length===0&&h("p",{className:"muted italic"},"No active bets."),
     ...myGroupBets.map(b=>{
