@@ -57,8 +57,23 @@ function LivePhase({room,myName,isHost,onRoomUpdate}) {
 
   const activeBetIds=room.activeBets||[];
   const myGroupBets=(room.bets||[]).filter(b=>b.group===myGroup&&activeBetIds.includes(b.id));
-  const fmt=ms=>{const s=Math.floor(ms/1000),m=Math.floor(s/60);return `${m}:${String(s%60).padStart(2,"0")}`;};
-
+  const fmt = (ms) => {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+  
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+  
+    const dd = String(d).padStart(2, "0");
+    const hh = String(h).padStart(2, "0");
+    const mm = String(m).padStart(2, "0");
+    const ss = String(s).padStart(2, "0");
+  
+    if (d > 0) return `${dd}d${hh}h${mm}m${ss}s`;
+    if (h > 0) return `${hh}h${mm}m${ss}s`;
+    return `${mm}m${ss}s`;
+  };
   const resolveBetVerified=(bet,r)=>{
     const drinkTotals={...(r.drinkTotals||{})};
     const giveTotals={...(r.giveTotals||{})};
