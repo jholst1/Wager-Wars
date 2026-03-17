@@ -42,8 +42,8 @@ function WageringPhase({room,myName,isHost,onRoomUpdate}) {
     return pb.length===0||Object.keys((room.wagers||{})[p.name]||{}).length>=pb.length;
   });
   const startGame=async()=>{
-    const timerEnd=Date.now()+room.timerMinutes*60*1000;
-    const u={...room,phase:"live",timerEnd,activeBets:(room.bets||[]).filter(b=>b.locked).map(b=>b.id)};
+  const timerEnd = Date.now() + (room.durationMs || room.timerMinutes*60*1000);
+  const u={...room,phase:"live",timerEnd,activeBets:(room.bets||[]).filter(b=>b.locked).map(b=>b.id)};
     await saveRoom(room.code,u); onRoomUpdate(u);
   };
 
