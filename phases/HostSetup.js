@@ -1,3 +1,11 @@
+(function(){
+window.BG = window.BG || {};
+BG.phases = BG.phases || {};
+const { h, useState, useRef } = BG.core;
+const { Btn, Card, Inp } = BG.ui;
+const { genCode } = BG.consts;
+const { saveRoom } = BG.fb;
+
 function HostSetup({onStart}) {
   const [name,setName]=useState("");
 
@@ -28,10 +36,10 @@ function HostSetup({onStart}) {
       phase:"lobby",
       hostName:name.trim(),
 
-      // NEW (preferred going forward)
+      // NEW preferred field
       durationMs: safeDurationMs,
 
-      // Backwards-compat (optional but helpful until you update other files)
+      // backward compat (so other code still works)
       timerMinutes: Math.round(safeDurationMs/60000),
 
       maxWagerTotal:(noLimit?null:(parseInt(maxTotal||"14",10)||14)),
@@ -53,7 +61,6 @@ function HostSetup({onStart}) {
       h(Inp,{value:name,onChange:setName,placeholder:"Enter your name"})
     ),
 
-    // NEW: duration selector
     h(Card,{},
       h("span",{className:"label"},"Game duration"),
       h("div",{className:"flex items-center gap2",style:{flexWrap:"wrap"}},
@@ -86,7 +93,6 @@ function HostSetup({onStart}) {
       )
     ),
 
-    // existing wager cap
     h(Card,{},
       h("span",{className:"label"},"Max total wager per player (sum of abs wagers)"),
       h("div",{className:"flex items-center gap3"},
@@ -100,3 +106,6 @@ function HostSetup({onStart}) {
     h(Btn,{onClick:start,color:"green",full:true},"Create Room")
   );
 }
+
+BG.phases.HostSetup = HostSetup;
+})();
